@@ -6,13 +6,16 @@ export class Square{
     constructor(row:number, column:number, piece: Piece | null = null) {
         this.occupying = piece;
         this.row = row;
-        this.column = row;
+        this.column = column;
     }
     clear(){
         this.occupying = null;
     }
     occupy(piece: Piece){
         this.occupying = piece;
+    }
+    getPiece():Piece|null{
+        return this.occupying;
     }
 
 }

@@ -1,16 +1,20 @@
 import {Piece} from './Piece';
 import {Square} from './Square';
-class Board{
+export class Board{
     squares: Square[][];
-    constructor() {
+    constructor(width:number) {
         this.squares = [];
-        for (let i = 0; i < 8; i++) {
+        for (let i = 0; i < width; i++) {
             let row: Square[] = []
-            for (let j = 0; j < 8; j++) {
+            for (let j = 0; j < width; j++) {
                 row.push(new Square(i,j));
             }
             this.squares.push(row);
         }
+    }
+
+    getBoardState():Square[][]{
+        return this.squares;
     }
 
 

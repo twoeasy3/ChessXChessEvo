@@ -1,9 +1,13 @@
-import { Chessboard } from "react-chessboard";
+import React from 'react';
+import Chessboard from './components/Chessboard';
 
-export default function App() {
+const App = () => {
     return (
         <div>
-            <Chessboard id="BasicBoard" />
+            <h1>Chessboard Example</h1>
+            <Chessboard size={10} />
         </div>
     );
-}
+};
+
+export default App;

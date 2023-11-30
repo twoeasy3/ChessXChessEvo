@@ -43,5 +43,11 @@ class LeapingHippo implements MovementBehaviour{
     move():void{
         console.log('Leaping behaviour');
     }
-};
+}
+
+class ScreenCapture implements MovementBehaviour{
+    move():void{
+        console.log('Screen Capture');
+    }
+}
 

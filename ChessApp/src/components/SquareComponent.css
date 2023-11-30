@@ -1,0 +1,16 @@
+.chess-cell {
+    width: 100px;
+    height: 100px;
+}
+
+.light-cell {
+    width: 100px;
+    height: 100px;
+    background-color: #eee;
+}
+
+.dark-cell {
+    width: 100px;
+    height: 100px;
+    background-color: #aaa;
+}
