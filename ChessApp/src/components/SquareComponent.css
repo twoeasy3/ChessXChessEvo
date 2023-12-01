@@ -1,16 +1,35 @@
 .chess-cell {
-    width: 100px;
-    height: 100px;
+    user-select: none;
+    width: 90px; /*takes into account border*/
+    height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer; /* Add a pointer cursor for better UX */
+    border: 5px solid transparent; /* Initial border style */
 }
 
 .light-cell {
-    width: 100px;
-    height: 100px;
     background-color: #eee;
 }
 
 .dark-cell {
+    background-color: #aaa;
+}
+
+.selected {
+    border-color: red; /* Adjust the border color as needed */
+}
+.icon-container {
+    user-select: none;
+    position: relative;
     width: 100px;
     height: 100px;
-    background-color: #aaa;
+}
+
+.overlay-target {
+    user-select: none;
+    position: absolute;
+    width: 100px;
+    height: 100px;
 }

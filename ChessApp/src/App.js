@@ -5,7 +5,7 @@ const App = () => {
     return (
         <div>
             <h1>Chessboard Example</h1>
-            <Chessboard size={10} />
+            <Chessboard size={10}/>
         </div>
     );
 };
