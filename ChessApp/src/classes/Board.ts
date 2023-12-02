@@ -18,9 +18,9 @@ export class Board{
             this.squares[i][width - 2].occupy(new Pieces.Pawn(false, i, width - 2))
         }
         this.squares[2][1].occupy(new Pieces.Mann(true, 2, 1))
-        this.squares[width - 2][1].occupy(new Pieces.Mann(true, width - 2, 1))
+        this.squares[width - 3][1].occupy(new Pieces.Mann(true, width - 2, 1))
         this.squares[2][8].occupy(new Pieces.Mann(false, 2, 8))
-        this.squares[width - 2][8].occupy(new Pieces.Mann(false, width - 2, 8))
+        this.squares[width - 3][8].occupy(new Pieces.Mann(false, width - 2, 8))
         this.squares[0][0].occupy(new Pieces.Rook(true, 0, 0))
         this.squares[1][0].occupy(new Pieces.Knight(true, 1, 0))
         this.squares[2][0].occupy(new Pieces.Unicorn(true, 2, 0))
