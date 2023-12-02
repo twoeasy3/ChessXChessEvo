@@ -161,7 +161,40 @@ class PawnCapture extends BasicLinearMoves{
         this.moveMatrix = (isBlack ? [[1,1],[-1,1]] : [[1,-1],[-1,-1]])
     }
 }
+class CannonCapture implements MovementBehaviour{
+    moveMatrix: number[][]
+    constructor() {
+        this.moveMatrix=[[1,0],[0,1],[-1,0],[0,-1]]
+    }
+    getMoves(boardState: Square[][], piece: Piece): number[][] {
+        console.log("CannonCapture doesn't have movement defined!")
+        return[];
+    }
+    getCaptures(boardState:Square[][],piece:Piece):number[][]{
+        let i:number = 1;
+        let legalCaptures: number[][] = []
+        let screenFound = false;
+        for (const direction of this.moveMatrix){
+            i = 1;
+            screenFound = false
+            while(
+            (piece.colPos + i*direction[0]) >= 0 && (piece.colPos + i*direction[0]) <= boardState[0].length -1 &&
+            (piece.rowPos + i*direction[1]) >= 0 && (piece.rowPos + i*direction[1]) <= boardState.length -1){
+                if( boardState[piece.colPos+i*direction[0]][piece.rowPos+i*direction[1]].occupying != null){
+                    if(boardState[piece.colPos+i*direction[0]][piece.rowPos+i*direction[1]].occupying?.isBlack != piece.isBlack && screenFound === true) {
+                        legalCaptures.push([piece.colPos + i * direction[0],piece.rowPos + i * direction[1]]);
+                        break;}
+                    if(boardState[piece.colPos+i*direction[0]][piece.rowPos+i*direction[1]].occupying != null && screenFound === false){
+                        screenFound = true
+                    }
+                }
+                i++
+            }
+        }
+        return legalCaptures
+    }
 
+}
 export class Pawn extends Piece{
     constructor(isBlack:boolean, colPos: number, rowPos: number) {
         super(1, isBlack, isBlack ? '/pieces/pawn_black.png' : '/pieces/pawn_white.png', colPos, rowPos);
@@ -227,5 +260,13 @@ export class Mann extends Piece{
         this.captureBehaviours.push(new SlidingDiag(1));
         this.movementBehaviours.push(new SlidingOrtho(1));
         this.captureBehaviours.push(new SlidingOrtho(1));
+    }
+}
+export class Cannon extends Piece{
+    constructor(isBlack:boolean, colPos: number, rowPos: number) {
+        super(5, isBlack, isBlack ? '/pieces/cannon_black.png' : '/pieces/cannon_white.png', colPos, rowPos);
+        this.canCastle = true;
+        this.movementBehaviours.push(new SlidingOrtho(16));
+        this.captureBehaviours.push(new CannonCapture());
     }
 }

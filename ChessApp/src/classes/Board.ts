@@ -21,7 +21,7 @@ export class Board{
         this.squares[width - 3][1].occupy(new Pieces.Mann(true, width - 3, 1))
         this.squares[2][8].occupy(new Pieces.Mann(false, 2, 8))
         this.squares[width - 3][8].occupy(new Pieces.Mann(false, width - 3, 8))
-        this.squares[0][0].occupy(new Pieces.Rook(true, 0, 0))
+        this.squares[0][0].occupy(new Pieces.Cannon(true, 0, 0))
         this.squares[1][0].occupy(new Pieces.Knight(true, 1, 0))
         this.squares[2][0].occupy(new Pieces.Unicorn(true, 2, 0))
         this.squares[3][0].occupy(new Pieces.Bishop(true, 3, 0))
@@ -32,7 +32,7 @@ export class Board{
         this.squares[8][0].occupy(new Pieces.Knight(true, 8, 0))
         this.squares[9][0].occupy(new Pieces.Rook(true, 9, 0))
 
-        this.squares[0][9].occupy(new Pieces.Rook(false, 0, 9))
+        this.squares[0][9].occupy(new Pieces.Cannon(false, 0, 9))
         this.squares[1][9].occupy(new Pieces.Knight(false, 1, 9))
         this.squares[2][9].occupy(new Pieces.Unicorn(false, 2, 9))
         this.squares[3][9].occupy(new Pieces.Bishop(false, 3, 9))
