@@ -29,9 +29,9 @@ const SquareComponent: React.FC<SquareComponentProps> = ({ square,isSelected,isL
     return (
         <div className={`chess-cell ${cellColor}-cell ${isSelected ? 'selected' : ''}`} onClick={onClick}>
             {square.getPiece()!=null ? <img src={square.getPiece()?.image} alt={"piece image"} className={`icon-container`} draggable="false"/> : <div></div>}
-            {isLegalMove ? <img src={"/pieces/move_dot.png"} alt={"move target"} draggable="false"/> : <div></div>}
-            {isLegalCapture ? <img src={"/pieces/target.png"} alt={"capture target"} className={`overlay-target`} draggable="false"/> : <div></div>}
-            {(teamInCheck && square.getPiece()?.royalty) ? <img src={"/pieces/check.png"} alt={"capture target"} className={`overlay-target`} draggable="false"/> : <div></div>}
+            {isLegalMove ? <img src={"./pieces/move_dot.png"} alt={"move target"} draggable="false"/> : <div></div>}
+            {isLegalCapture ? <img src={"./pieces/target.png"} alt={"capture target"} className={`overlay-target`} draggable="false"/> : <div></div>}
+            {(teamInCheck && square.getPiece()?.royalty) ? <img src={"./pieces/check.png"} alt={"capture target"} className={`overlay-target`} draggable="false"/> : <div></div>}
         </div>
     );
 };

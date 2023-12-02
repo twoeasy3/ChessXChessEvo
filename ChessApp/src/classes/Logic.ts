@@ -2,11 +2,13 @@ import {King, Piece} from './Piece';
 import {Square} from './Square';
 // @ts-ignore
 import _ from 'lodash';
+import exp from "constants";
 
 export enum Teams{
-    WHITE = 'white',
-    BLACK = 'black',
-    NONE = 'none'
+    WHITE = 'White',
+    BLACK = 'Black',
+    NONE = 'None',
+    DRAW = 'Draw',
 }
 function isSubArray(subArray: number[], array: number[][]) {
     return array.some((arr) =>
@@ -99,4 +101,27 @@ export function disqualifyMovesForCheck(moveDict:{[key:string]: number[][]},boar
     }
     console.log("MOVEDICT", moveDict)
     return moveDict;
+}
+
+export function checkForMate(moveDict:{[key:string]: number[][]}, captDict:{[key:string]: number[][]}, teamInCheck:Teams, teamTurn:boolean ){
+    for(const key of Object.keys(moveDict)){
+        if(moveDict[key].length !== 0){
+            return "None"
+        }
+        for(const key of Object.keys(captDict)){
+            if(captDict[key].length !== 0){
+                return "None"
+            }
+    }
+    if(teamInCheck == Teams.WHITE && !teamTurn){
+        return "Black"
+    }
+    else if(teamInCheck == Teams.BLACK && teamTurn){
+        return "White"
+    }
+    else{
+        return "Draw"
+    }
+    }
+    return "None"
 }

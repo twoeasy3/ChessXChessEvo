@@ -93,7 +93,7 @@ class BasicLinearMoves implements MovementBehaviour{
         }
         return legalCaptures
     }
-} /*Moves require uninterrupted line of sight. Leapers fall under this category, they move along a different axis*/
+} /*Moves that require uninterrupted line of sight. Leapers fall under this category, they move along a different axis*/
 class LeapingHippo extends BasicLinearMoves {
     axis1: number;
     axis2: number;
@@ -161,8 +161,6 @@ class PawnCapture extends BasicLinearMoves{
         this.moveMatrix = (isBlack ? [[1,1],[-1,1]] : [[1,-1],[-1,-1]])
     }
 }
-
-
 
 export class Pawn extends Piece{
     constructor(isBlack:boolean, colPos: number, rowPos: number) {

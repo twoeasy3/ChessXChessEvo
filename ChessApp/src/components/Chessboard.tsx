@@ -10,14 +10,16 @@ import {
     disqualifyMovesForCheck,
     Teams
 } from "../classes/Logic";
+
 import * as Logic from "../classes/Logic";
 
 
 interface ChessboardProps {
     size: number;
+    onGameEnd: Function
 }
 
-const Chessboard: React.FC<ChessboardProps> = ({ size }) => {
+const Chessboard: React.FC<ChessboardProps> = ({ size,onGameEnd}) => {
     const [boardState, setBoardState] = useState<Square[][]>(new Board(size).getBoardState())
     const [selectedSquare, setSelectedSquare] = useState<any | null>(null);
     const [legalMoves, setLegalMoves] = useState<number[][]>([])
@@ -45,6 +47,10 @@ const Chessboard: React.FC<ChessboardProps> = ({ size }) => {
             setMoveDict(disqualifyMovesForCheck(createMoveDictionary(boardState,!teamTurn),boardState,!teamTurn))
             /*I don't know why it is !teamTurn, doesnt seem right*/
             setCaptureDict(disqualifyMovesForCheck(createCaptureDictionary(boardState,!teamTurn),boardState,!teamTurn))
+            let checkWinner:string = Logic.checkForMate(moveDict,captureDict,teamInCheck,teamTurn);
+            if(checkWinner !== "None"){
+                onGameEnd(checkWinner)
+            }
             setSelectedSquare(null);
             setLegalMoves([]);
             setLegalCaptures([]);
