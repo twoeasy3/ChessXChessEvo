@@ -97,25 +97,55 @@ export function disqualifyMovesForCheck(moveDict:{[key:string]: number[][]},boar
     return moveDict;
 }
 
+export function checkIfEveryDictEntryIsBlank(moveDict:{[key:string]: number[][]}) {
+    for (const key of Object.keys(moveDict)) {
+        console.log("checkIfEveryDictEntryIsBlank: ", moveDict[key])
+        if (moveDict[key].length !== 0) {
+            return false
+        }
+
+    }
+    return true
+}
+
 export function checkForMate(moveDict:{[key:string]: number[][]}, captDict:{[key:string]: number[][]}, teamInCheck:Teams, teamTurn:boolean ){
-    for(const key of Object.keys(moveDict)){
+    /*or(const key of Object.keys(moveDict)){
+        console.log("movedict check: ",moveDict[key])
         if(moveDict[key].length !== 0){
             return "None"
         }
         for(const key of Object.keys(captDict)){
+            console.log("captdict check: ",captDict[key])
             if(captDict[key].length !== 0){
                 return "None"
             }
-    }
-    if(teamInCheck == Teams.WHITE && !teamTurn){
+    }*/
+    console.log("Checking for black", teamTurn)
+    console.log("Mate checking: ",moveDict,captDict)
+    if(teamInCheck == Teams.WHITE && !teamTurn && checkIfEveryDictEntryIsBlank(moveDict) && checkIfEveryDictEntryIsBlank(captDict)){
         return "Black"
     }
-    else if(teamInCheck == Teams.BLACK && teamTurn){
+    else if(teamInCheck == Teams.BLACK && teamTurn && checkIfEveryDictEntryIsBlank(moveDict) && checkIfEveryDictEntryIsBlank(captDict)){
+
         return "White"
     }
-    else{
+    else if(teamInCheck == Teams.NONE && checkIfEveryDictEntryIsBlank(moveDict) && checkIfEveryDictEntryIsBlank(captDict)) {
         return "Draw"
     }
-    }
     return "None"
+}
+
+export function pawnInPromotionZone(square:Square, lastRow:number){
+    if(!square.occupying?.canPromote){
+        return false;
+    }
+    else{
+        if(square.occupying?.isBlack && square.row == lastRow ){
+            return true
+        }
+        else if(!square.occupying?.isBlack && square.row == 0){
+            return true
+        }
+    }
+    return false
 }

@@ -2,12 +2,14 @@
 import React, {useState} from 'react';
 import {Square} from '../classes/Square'; // Import your Square class
 import SquareComponent from './SquareComponent'; // Import the React component
+import {PromotionDialog} from "./PromotionDialog";
 import {Board} from '../classes/Board';
+import {Piece}  from '../classes/Piece';
 import {
     coordToKey,
     createCaptureDictionary,
     createMoveDictionary,
-    disqualifyMovesForCheck,
+    disqualifyMovesForCheck, pawnInPromotionZone,
     Teams
 } from "../classes/Logic";
 
@@ -17,9 +19,10 @@ import * as Logic from "../classes/Logic";
 interface ChessboardProps {
     size: number;
     onGameEnd: Function
+    flipTurn: Function
 }
 
-const Chessboard: React.FC<ChessboardProps> = ({ size,onGameEnd}) => {
+const Chessboard: React.FC<ChessboardProps> = ({ size,onGameEnd, flipTurn}) => {
     const [boardState, setBoardState] = useState<Square[][]>(new Board(size).getBoardState())
     const [selectedSquare, setSelectedSquare] = useState<any | null>(null);
     const [legalMoves, setLegalMoves] = useState<number[][]>([])
@@ -28,6 +31,8 @@ const Chessboard: React.FC<ChessboardProps> = ({ size,onGameEnd}) => {
     const [teamTurn,setTeamTurn] = useState<boolean>(false)
     const [moveDict,setMoveDict] = useState<{[key:string]: number[][]}>(disqualifyMovesForCheck(createMoveDictionary(boardState,teamTurn),boardState,teamTurn))
     const [captureDict,setCaptureDict] = useState<{[key:string]: number[][]}>(disqualifyMovesForCheck(createCaptureDictionary(boardState,teamTurn),boardState,teamTurn))
+    const [showPromotionDialog,setShowPromotion] = useState<boolean>(false)
+    const [promotionSquare,setPromotionSquare] = useState<Square|null>(null)
     const handleSquareClick = (key:any, clickedSquare:Square, boardState:Square[][]) => {
         let previousSquare:Square|null = null
         if(selectedSquare!=null){
@@ -39,13 +44,24 @@ const Chessboard: React.FC<ChessboardProps> = ({ size,onGameEnd}) => {
         const allLegalPlays = legalMoves.concat(legalCaptures);
         if(previousSquare!== null && isSubArray([clickedSquare.column,clickedSquare.row],allLegalPlays)){
             previousSquare.moveTo(clickedSquare.column,clickedSquare.row,boardState)
+            if(pawnInPromotionZone(clickedSquare,boardState[0].length-1)){
+                setShowPromotion(true)
+                setPromotionSquare(clickedSquare)
+            }
+            else{
+                setShowPromotion(false)
+            }
             setBoardState(boardState)
             setCheck(Logic.lookForCheck(boardState,!clickedSquare.occupying!.isBlack))
             setTeamTurn(!teamTurn)
+            flipTurn();
             setMoveDict(disqualifyMovesForCheck(createMoveDictionary(boardState,!teamTurn),boardState,!teamTurn))
             /*I don't know why it is !teamTurn, doesnt seem right*/
             setCaptureDict(disqualifyMovesForCheck(createCaptureDictionary(boardState,!teamTurn),boardState,!teamTurn))
-            let checkWinner:string = Logic.checkForMate(moveDict,captureDict,teamInCheck,teamTurn);
+            /*All of these is because react setState is async, something to change*/
+            let checkWinner:string = Logic.checkForMate(disqualifyMovesForCheck(createMoveDictionary(boardState,!teamTurn),boardState,!teamTurn)
+                                                        ,disqualifyMovesForCheck(createCaptureDictionary(boardState,!teamTurn),boardState,!teamTurn)
+                                                        ,teamInCheck,!teamTurn);
             if(checkWinner !== "None"){
                 onGameEnd(checkWinner)
             }
@@ -97,7 +113,15 @@ const Chessboard: React.FC<ChessboardProps> = ({ size,onGameEnd}) => {
         }
         return false;
     }
+    function boardHandlePromotion(selectedPiece:Piece){
+        let teamIsBlack:boolean = promotionSquare!.occupying!.isBlack
+        selectedPiece.changeTeam(teamIsBlack)
+        selectedPiece.updatePosition(promotionSquare!.column,promotionSquare!.row)
+        promotionSquare!.occupy(selectedPiece)
+        handleSquareClick(Logic.coordToKey([promotionSquare!.column,promotionSquare!.row]), promotionSquare!, boardState)
+        setShowPromotion(false)
 
+    }
     const generateChessboard = () => {
         // Create instances of the Square class for each cell
 
@@ -115,12 +139,16 @@ const Chessboard: React.FC<ChessboardProps> = ({ size,onGameEnd}) => {
                         teamInCheck = {determineCheck(square)}
                     />
                 ))}
+
             </div>
         ));
     };
     return (
         <div className="chessboard" style={{ display: 'grid', gridTemplateColumns: `repeat(${size}, 100px)` }}>
             {generateChessboard()}
+            {showPromotionDialog && (
+                <PromotionDialog onSelect={(selectedPiece:Piece) => boardHandlePromotion(selectedPiece)}/>
+                )}
         </div>
     );
 };

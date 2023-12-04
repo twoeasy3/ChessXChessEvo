@@ -15,20 +15,22 @@ export class Piece{
     colPos: number;
     rowPos: number;
     canCastle: boolean;
+    canPromote: boolean;
     hasDeathTrigger: boolean;
 
 
-    constructor(pointValue: number, isBlack:boolean, imageString:string, colPos: number, rowPos: number, isRoyal:boolean = false ) {
+    constructor(pointValue: number, isBlack:boolean, imageString:string, colPos: number, rowPos: number ) {
         this.hasMoved = false;
         this.pointValue = pointValue;
         this.movementBehaviours = [];
         this.captureBehaviours = [];
-        this.royalty = isRoyal;
+        this.royalty = false;
         this.isBlack = isBlack;
         this.image = imageString;
         this.colPos = colPos;
         this.rowPos = rowPos;
         this.canCastle = false;
+        this.canPromote = false;
         this.hasDeathTrigger = false;
     }
     getMoves(boardState: Square[][]):number[][]{
@@ -53,6 +55,10 @@ export class Piece{
     updatePosition(newColPos: number, newRowPos:number){
         this.colPos = newColPos;
         this.rowPos = newRowPos;
+    }
+    changeTeam(newTeam:boolean):void{
+        this.isBlack = newTeam;
+        this.image = this.image.split('_')[0] + (this.isBlack ? "_black.png" : "_white.png")
     }
 }
 interface MovementBehaviour{
@@ -188,9 +194,13 @@ class CannonCapture implements MovementBehaviour{
             (piece.colPos + i*direction[0]) >= 0 && (piece.colPos + i*direction[0]) <= boardState[0].length -1 &&
             (piece.rowPos + i*direction[1]) >= 0 && (piece.rowPos + i*direction[1]) <= boardState.length -1){
                 if( boardState[piece.colPos+i*direction[0]][piece.rowPos+i*direction[1]].occupying != null){
-                    if(boardState[piece.colPos+i*direction[0]][piece.rowPos+i*direction[1]].occupying?.isBlack != piece.isBlack && screenFound === true) {
-                        legalCaptures.push([piece.colPos + i * direction[0],piece.rowPos + i * direction[1]]);
-                        break;}
+                    if(screenFound === true) {
+                        if (boardState[piece.colPos + i * direction[0]][piece.rowPos + i * direction[1]].occupying?.isBlack != piece.isBlack) {
+                            legalCaptures.push([piece.colPos + i * direction[0], piece.rowPos + i * direction[1]]);
+                            break;
+                        }
+                        else{break;}
+                    }
                     if(boardState[piece.colPos+i*direction[0]][piece.rowPos+i*direction[1]].occupying != null && screenFound === false){
                         screenFound = true
                     }
@@ -205,6 +215,7 @@ class CannonCapture implements MovementBehaviour{
 export class Pawn extends Piece{
     constructor(isBlack:boolean, colPos: number, rowPos: number) {
         super(1, isBlack, isBlack ? '/pieces/pawn_black.png' : '/pieces/pawn_white.png', colPos, rowPos);
+        this.canPromote = true;
         this.movementBehaviours.push(new MarchForward(1,2));
         this.captureBehaviours.push(new PawnCapture(this.isBlack));
     }
@@ -252,7 +263,8 @@ export class Queen extends Piece{
 }
 export class King extends Piece{
     constructor(isBlack:boolean, colPos: number, rowPos: number) {
-        super(3, isBlack, isBlack ? '/pieces/king_black.png' : '/pieces/king_white.png', colPos, rowPos, true);
+        super(3, isBlack, isBlack ? '/pieces/king_black.png' : '/pieces/king_white.png', colPos, rowPos);
+        this.royalty = true;
         this.canCastle = true;
         this.movementBehaviours.push(new SlidingDiag(1));
         this.captureBehaviours.push(new SlidingDiag(1));
