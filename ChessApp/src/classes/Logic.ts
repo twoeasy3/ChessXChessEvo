@@ -55,7 +55,6 @@ export function keyToCoord(str: string): number[] {
 }
 
 export function lookForCheck(boardState: Square[][],teamIsBlack:boolean){ /*team to check if their king is in check*/
-    console.log("team looking for isBlack:", teamIsBlack)
     let playerKings:number[][] = [];
     let legalCaptures:number[][] = [];
     for (let i=0; i<= boardState.length -1; i++){
@@ -73,7 +72,6 @@ export function lookForCheck(boardState: Square[][],teamIsBlack:boolean){ /*team
     if(legalCaptures.length != 0) {
         for (let k = 0; k <= playerKings.length - 1; k++) {
             if (isSubArray(playerKings[k], legalCaptures)) {
-                console.log("KING IN CHECK")
                 return((teamIsBlack ? Teams.BLACK : Teams.WHITE))
 
             }
@@ -89,17 +87,13 @@ export function disqualifyMovesForCheck(moveDict:{[key:string]: number[][]},boar
         let okayMoves: number[][] = [];
         for(let i = 0; i<= legalMoves.length-1 ; i++){
             let copiedBoard: Square[][] = _.cloneDeep(boardState)
-                console.log(legalMoves[i])
-                console.log("CHECKING:", lookForCheck(copiedBoard,teamIsBlack))
                 copiedBoard[col][row].moveTo(legalMoves[i][0],legalMoves[i][1],copiedBoard);
                 if(lookForCheck(copiedBoard,teamIsBlack) == Teams.NONE){
                     okayMoves = okayMoves.concat([legalMoves[i]])
-                    console.log("okay'ed:" , okayMoves)
                 }
         }
         moveDict[key] = okayMoves;
     }
-    console.log("MOVEDICT", moveDict)
     return moveDict;
 }
 

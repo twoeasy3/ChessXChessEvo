@@ -1,5 +1,6 @@
 import {Square} from './Square';
 import {Teams} from './Logic'
+import {Board} from "./Board";
 
 export{};
 
@@ -14,6 +15,7 @@ export class Piece{
     colPos: number;
     rowPos: number;
     canCastle: boolean;
+    hasDeathTrigger: boolean;
 
 
     constructor(pointValue: number, isBlack:boolean, imageString:string, colPos: number, rowPos: number, isRoyal:boolean = false ) {
@@ -27,6 +29,7 @@ export class Piece{
         this.colPos = colPos;
         this.rowPos = rowPos;
         this.canCastle = false;
+        this.hasDeathTrigger = false;
     }
     getMoves(boardState: Square[][]):number[][]{
         let legalMoves: number[][] = [];
@@ -43,9 +46,13 @@ export class Piece{
         return(legalCaptures);
     }
 
-    updatePosition(newRowPos: number, newColPos:number){
-        this.colPos = newRowPos;
-        this.rowPos = newColPos;
+    onDeath(boardState:Square[][]){
+        console.log("Piece has no death effects")
+    }
+
+    updatePosition(newColPos: number, newRowPos:number){
+        this.colPos = newColPos;
+        this.rowPos = newRowPos;
     }
 }
 interface MovementBehaviour{
@@ -268,5 +275,23 @@ export class Cannon extends Piece{
         this.canCastle = true;
         this.movementBehaviours.push(new SlidingOrtho(16));
         this.captureBehaviours.push(new CannonCapture());
+    }
+}
+export class Roach extends Piece{
+    constructor(isBlack:boolean, colPos: number, rowPos: number) {
+        super(2, isBlack, isBlack ? '/pieces/roach_black.png' : '/pieces/roach_white.png', colPos, rowPos);
+        this.movementBehaviours.push(new MarchForward(1,1));
+        this.captureBehaviours.push(new PawnCapture(this.isBlack));
+        this.hasDeathTrigger = true;
+    }
+    onDeath(boardState: Square[][]): void {
+        if(this.isBlack && boardState[this.colPos][1].occupying == null){
+            boardState[this.colPos][1].occupy(this)
+            this.updatePosition(this.colPos, 1)
+        }
+        if(!this.isBlack && boardState[this.colPos][boardState[this.colPos].length-2].occupying == null){
+            boardState[this.colPos][boardState[this.colPos].length-2].occupy(this)
+            this.updatePosition(this.colPos, boardState[this.colPos].length-2)
+        }
     }
 }

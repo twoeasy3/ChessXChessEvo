@@ -36,8 +36,6 @@ const Chessboard: React.FC<ChessboardProps> = ({ size,onGameEnd}) => {
         else{
             previousSquare = null;
         }
-        console.log("legal move", legalMoves)
-        console.log("legal capture", legalCaptures)
         const allLegalPlays = legalMoves.concat(legalCaptures);
         if(previousSquare!== null && isSubArray([clickedSquare.column,clickedSquare.row],allLegalPlays)){
             previousSquare.moveTo(clickedSquare.column,clickedSquare.row,boardState)
@@ -54,8 +52,6 @@ const Chessboard: React.FC<ChessboardProps> = ({ size,onGameEnd}) => {
             setSelectedSquare(null);
             setLegalMoves([]);
             setLegalCaptures([]);
-            console.log("MOVE DICT", moveDict)
-            console.log("CAPT DICT", captureDict)
         }
         else {
 
