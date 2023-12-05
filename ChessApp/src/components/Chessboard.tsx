@@ -133,6 +133,17 @@ const Chessboard: React.FC<ChessboardProps> = ({ size,onGameEnd, flipTurn}) => {
         handleSquareClick(Logic.coordToKey([promotionSquare!.column,promotionSquare!.row]), promotionSquare!, boardState)
         setShowPromotion(false)
         setCanClick(true)
+        setCheck(Logic.lookForCheck(boardState,teamTurn))
+        setMoveDict(disqualifyMovesForCheck(createMoveDictionary(boardState, teamTurn), boardState, teamTurn))
+        setCaptureDict(disqualifyMovesForCheck(createCaptureDictionary(boardState, teamTurn), boardState, teamTurn))
+        setCastleDict(Logic.createCastleDictionary(boardState,teamTurn))
+        let checkWinner: string = Logic.checkForMate(disqualifyMovesForCheck(createMoveDictionary(boardState, !teamTurn), boardState, !teamTurn)
+            , disqualifyMovesForCheck(createCaptureDictionary(boardState, !teamTurn), boardState, !teamTurn)
+            , teamInCheck, !teamTurn);
+        if (checkWinner !== "None") {
+            onGameEnd(checkWinner)
+        }
+
 
     }
     const generateChessboard = () => {

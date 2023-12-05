@@ -2,9 +2,6 @@
     position: absolute;
     top: 400px;
     left: 100px;
-    width: 400px;
-    height: 100px;
-    background: rgba(0, 0, 0, 0.8);
     z-index: 1000; /* Ensure the overlay is on top of other elements */
 }
 
@@ -14,12 +11,14 @@
     align-items: center;
     user-select: none;
     position: relative;
-    width: 100px;
     height: 100px;
+    background: rgba(0, 0, 0, 0.8);
 }
 
-.promotion-options button {
-    margin: 8px;
-    padding: 10px;
-    font-size: 16px;
+.promotion-title{
+    background: rgba(0, 0, 0, 0.8);
+    color:white;
+    font-size: 30px;
+    font-family: Arial, Helvetica, sans-serif
+
 }
