@@ -1,6 +1,8 @@
 import {Square} from './Square';
-import {Teams} from './Logic'
+import {coordToKey, createMoveDictionary, disqualifyMovesForCheck, lookForCheck, Teams} from './Logic'
 import {Board} from "./Board";
+// @ts-ignore
+import _ from 'lodash';
 
 export{};
 
@@ -50,6 +52,11 @@ export class Piece{
 
     onDeath(boardState:Square[][]){
         console.log("Piece has no death effects")
+    }
+
+    getCastles(boardState:Square[][]):{[key:string]: number[][]}|null{
+        console.log("Piece cannot initiate a castling move")
+        return null
     }
 
     updatePosition(newColPos: number, newRowPos:number){
@@ -265,11 +272,82 @@ export class King extends Piece{
     constructor(isBlack:boolean, colPos: number, rowPos: number) {
         super(3, isBlack, isBlack ? '/pieces/king_black.png' : '/pieces/king_white.png', colPos, rowPos);
         this.royalty = true;
-        this.canCastle = true;
         this.movementBehaviours.push(new SlidingDiag(1));
         this.captureBehaviours.push(new SlidingDiag(1));
         this.movementBehaviours.push(new SlidingOrtho(1));
         this.captureBehaviours.push(new SlidingOrtho(1));
+    }
+    getCastles(boardState:Square[][]){
+        if(this.hasMoved || this.colPos == 0 || this.colPos == boardState.length-1){
+            return null
+        }
+        let kingCastleDictionary:{[key:string]:number[][]} = {}
+        for(let i = 0; i <= boardState.length-1;i++){
+            if(boardState[i][this.rowPos].occupying != null){
+                if(boardState[i][this.rowPos].occupying!.canCastle && !boardState[i][this.rowPos].occupying!.hasMoved){
+                    let pathClear = true;
+                    let kingFinalPos = -1;
+                    if(i<this.colPos){
+                        let j=i+1;
+                        while(j<this.colPos){ /*Check if spaces are blank*/
+                            if(boardState[j][this.rowPos].occupying !== null){
+                                pathClear = false;
+                                break;
+                            }
+                            if(j-i < 3) { /*king only moves up to 2 spaces*/
+                                let copiedBoard: Square[][] = _.cloneDeep(boardState) /*Check if King's movement through the spaces is attacked*/
+                                /*This is the safest way to check just in case of unique capture methods!
+                                * Pieces that are not attacking the path now may be able to if a King were to be in there
+                                * Also, the capture dictionary doesn't check for empty squares anyway*/
+                                copiedBoard[this.colPos][this.rowPos].moveTo(j, this.rowPos, copiedBoard);
+                                if (lookForCheck(copiedBoard, this.isBlack) !== Teams.NONE) {
+                                    pathClear = false;
+                                    break;
+                                }
+                            }
+                            j++;
+                        }
+                      if(this.colPos - 2 < 0){ /*If King starts less than two spaces from the edge*/
+                          kingFinalPos = 0
+                      }
+                      else{
+                          kingFinalPos = this.colPos - 2
+                      }
+                      if(pathClear){
+                          kingCastleDictionary[coordToKey([i,this.rowPos])] = [[kingFinalPos,this.rowPos]] /*Dictionary: [rook pos]: [king pos]*/
+                      }
+                    }
+                    if(i>this.colPos){
+                        let k=i-1;
+                        while(k>this.colPos){
+                            if(boardState[k][this.rowPos].occupying !== null){
+                                pathClear = false;
+                                break;
+                            }
+                            if(i-k < 3) { /*king only moves up to 2 spaces*/
+                                let copiedBoard: Square[][] = _.cloneDeep(boardState) /*Check if King's movement through the spaces is dangerous*/
+                                copiedBoard[this.colPos][this.rowPos].moveTo(k, this.rowPos, copiedBoard);
+                                if (lookForCheck(copiedBoard, this.isBlack) !== Teams.NONE) {
+                                    pathClear = false;
+                                    break;
+                                }
+                            }
+                            k--;
+                        }
+                        if(this.colPos + 2 > boardState.length-1){ /*If King starts less than two spaces from the edge*/
+                            kingFinalPos = boardState.length-1
+                        }
+                        else{
+                            kingFinalPos = this.colPos + 2
+                        }
+                        if(pathClear){
+                            kingCastleDictionary[coordToKey([i,this.rowPos])] = [[kingFinalPos,this.rowPos]] /*Dictionary: [rook pos]: [king pos]*/
+                        }
+                    }
+                }
+            }
+        }
+    return kingCastleDictionary
     }
 }
 export class Mann extends Piece{
@@ -295,6 +373,7 @@ export class Roach extends Piece{
         this.movementBehaviours.push(new MarchForward(1,1));
         this.captureBehaviours.push(new PawnCapture(this.isBlack));
         this.hasDeathTrigger = true;
+        this.canPromote = true;
     }
     onDeath(boardState: Square[][]): void {
         if(this.isBlack && boardState[this.colPos][1].occupying == null){

@@ -3,6 +3,8 @@ import {Square} from './Square';
 // @ts-ignore
 import _ from 'lodash';
 import exp from "constants";
+import {Simulate} from "react-dom/test-utils";
+import click = Simulate.click;
 
 export enum Teams{
     WHITE = 'White',
@@ -10,7 +12,7 @@ export enum Teams{
     NONE = 'None',
     DRAW = 'Draw',
 }
-function isSubArray(subArray: number[], array: number[][]) {
+export function isSubArray(subArray: number[], array: number[][]) {
     return array.some((arr) =>
         arr.length === subArray.length && arr.every((num, index) => num === subArray[index])
     );
@@ -44,6 +46,48 @@ export function createCaptureDictionary(boardState: Square[][], teamIsBlack:bool
     return captureDictionary;
 }
 
+export function createCastleDictionary(boardState: Square[][], teamIsBlack:boolean): {[key:string]: {[key:string]: number[][]}}{
+    let castleDictionary:{[key:string]: {[key:string]: number[][]}} = {}
+    for (let i=0; i<= boardState.length -1; i++){
+        for(let j=0; j<=boardState[0].length -1; j++){
+            if(boardState[i][j].occupying != null){
+                if(boardState[i][j].occupying!.isBlack == teamIsBlack && boardState[i][j].occupying!.royalty && !boardState[i][j].occupying!.hasMoved){
+                    let kingCastleDict = boardState[i][j].occupying!.getCastles(boardState)
+                    /*Don't assert this, the check should be done*/
+                    if(kingCastleDict !== null) {
+                        castleDictionary[coordToKey([i, j])] = boardState[i][j].occupying!.getCastles(boardState)!
+                    }
+                }
+            }
+        }
+    }
+    return castleDictionary;
+}
+
+export function isInCastleDict(col: number, row: number, castleDict: {[key:string]: {[key:string]: number[][]}}){
+    for (const key of Object.keys(castleDict)) {
+        for (const key2 of Object.keys(castleDict[key])){
+             if(isSubArray([col,row],castleDict[key][key2])){
+                 return true
+             }
+        }
+    }
+    return false;
+}
+export function getPossibleCastles(castleDict: {[key:string]: {[key:string]: number[][]}}, clickedSquare:Square, teamTurn:boolean){
+    let arrayOfSquares:number[][] = []
+    let coord:string = coordToKey([clickedSquare.column,clickedSquare.row])
+    if(clickedSquare.occupying?.royalty != true || clickedSquare.occupying.isBlack != teamTurn ){
+        return []
+    }
+    if (castleDict[coord] == null){
+        return []
+    }
+    for (const key of Object.keys(castleDict[coord])){
+        arrayOfSquares = arrayOfSquares.concat(castleDict[coord][key])
+    }
+    return arrayOfSquares
+}
 
 export function coordToKey(array:number[]): string {
     return `${array[0]}-${array[1]}`;
@@ -99,7 +143,6 @@ export function disqualifyMovesForCheck(moveDict:{[key:string]: number[][]},boar
 
 export function checkIfEveryDictEntryIsBlank(moveDict:{[key:string]: number[][]}) {
     for (const key of Object.keys(moveDict)) {
-        console.log("checkIfEveryDictEntryIsBlank: ", moveDict[key])
         if (moveDict[key].length !== 0) {
             return false
         }
@@ -120,8 +163,6 @@ export function checkForMate(moveDict:{[key:string]: number[][]}, captDict:{[key
                 return "None"
             }
     }*/
-    console.log("Checking for black", teamTurn)
-    console.log("Mate checking: ",moveDict,captDict)
     if(teamInCheck == Teams.WHITE && !teamTurn && checkIfEveryDictEntryIsBlank(moveDict) && checkIfEveryDictEntryIsBlank(captDict)){
         return "Black"
     }

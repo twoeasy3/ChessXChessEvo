@@ -15,7 +15,7 @@ export class Board{
         }
         for (let i = 0; i < width; i++) {
             this.squares[i][1].occupy(new Pieces.Pawn(true, i, 1))
-            this.squares[i][width - 2].occupy(new Pieces.Pawn(false, i, width - 2))
+             this.squares[i][width - 2].occupy(new Pieces.Pawn(false, i, width - 2))
         }
         this.squares[2][1].occupy(new Pieces.Roach(true, 2, 1))
         this.squares[width - 3][1].occupy(new Pieces.Mann(true, width - 3, 1))
