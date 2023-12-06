@@ -378,7 +378,7 @@ export class Cannon extends Piece{
 }
 export class Roach extends Piece{
     constructor(isBlack:boolean, colPos: number, rowPos: number) {
-        super(2, isBlack, isBlack ? '/pieces/Roach_black.png' : '/pieces/roach_white.png', colPos, rowPos);
+        super(2, isBlack, isBlack ? '/pieces/eoach_black.png' : '/pieces/roach_white.png', colPos, rowPos);
         let tempMarch = new MarchForward(1,1);
         tempMarch.moveMatrix = (isBlack? [[0,1]] : [[0,-1]])
         this.movementBehaviours.push(tempMarch);
@@ -399,7 +399,7 @@ export class Roach extends Piece{
 }
 export class Berolina extends Piece{
     constructor(isBlack:boolean,colPos:number,rowPos:number) {
-        super(1,isBlack, isBlack ? '/pieces/Berolina_black.png' : '/pieces/Berolina_white.png', colPos, rowPos );
+        super(1,isBlack, isBlack ? '/pieces/berolina_black.png' : '/pieces/berolina_white.png', colPos, rowPos );
         this.canPromote = true
         let tempMarch = new MarchForward(1,2);
         tempMarch.moveMatrix = (isBlack? [[1,1],[-1,1]] : [[-1,-1],[1,-1]])
@@ -411,7 +411,7 @@ export class Berolina extends Piece{
 }
 export class EmpoweredBishop extends Piece{
     constructor(isBlack:boolean, colPos: number, rowPos: number) {
-        super(3, isBlack, isBlack ? '/pieces/EmpoweredBishop_black.png' : '/pieces/EmpoweredBishop_white.png', colPos, rowPos);
+        super(3, isBlack, isBlack ? '/pieces/empoweredbishop_black.png' : '/pieces/empoweredbishop_white.png', colPos, rowPos);
         this.movementBehaviours.push(new SlidingDiag(16));
         this.captureBehaviours.push(new SlidingDiag(16));
         this.movementBehaviours.push(new LeapingHippo(1,2));
@@ -461,7 +461,7 @@ export class EmpoweredBishop extends Piece{
 }
 export class EmpoweredKnight extends Piece{
     constructor(isBlack:boolean, colPos: number, rowPos: number) {
-        super(3, isBlack, isBlack ? '/pieces/EmpoweredKnight_black.png' : '/pieces/EmpoweredKnight_white.png', colPos, rowPos);
+        super(3, isBlack, isBlack ? '/pieces/empoweredknight_black.png' : '/pieces/empoweredknight_white.png', colPos, rowPos);
         this.movementBehaviours.push(new SlidingDiag(16));
         this.captureBehaviours.push(new SlidingDiag(16));
         this.movementBehaviours.push(new LeapingHippo(1,2));
@@ -511,7 +511,7 @@ export class EmpoweredKnight extends Piece{
 }
 export class EmpoweredRook extends Piece{
     constructor(isBlack:boolean, colPos: number, rowPos: number) {
-        super(5, isBlack, isBlack ? '/pieces/EmpoweredRook_black.png' : '/pieces/EmpoweredRook_white.png', colPos, rowPos);
+        super(5, isBlack, isBlack ? '/pieces/empoweredrook_black.png' : '/pieces/empoweredrook_white.png', colPos, rowPos);
         this.canCastle = true;
         this.movementBehaviours.push(new SlidingDiag(16));
         this.captureBehaviours.push(new SlidingDiag(16));

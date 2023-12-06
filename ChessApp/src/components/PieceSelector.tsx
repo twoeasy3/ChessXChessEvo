@@ -106,28 +106,28 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({ teamIsBlack,flipBu
                     <hr />
                         <div className="piece-options">
                             {pawnArray.map((name:string, index: number) => (
-                                <img src={(teamIsBlack ? `/pieces/${name}_black.png` : `/pieces/${name}_white.png`)} alt={"piece image"}
+                                <img src={(teamIsBlack ? `/pieces/${name.toLowerCase()}_black.png` : `/pieces/${name}_white.png`)} alt={"piece image"}
                                      className={`icon-container`} draggable="false" id="selectImage"/>)
                             )} </div>
                 <div className="piece-title">{"Minor Pieces"}</div>
                     <hr />
                         <div className="piece-options">
                             {minorArray.map((name:string, index: number) => (
-                                <img src={(teamIsBlack ? `/pieces/${name}_black.png` : `/pieces/${name}_white.png`)} alt={"piece image"}
+                                <img src={(teamIsBlack ? `/pieces/${name.toLowerCase()}_black.png` : `/pieces/${name}_white.png`)} alt={"piece image"}
                                      className={`icon-container`} draggable="false" id="selectImage"/>)
                             )} </div>
                 <div className="piece-title">{"Castle Pieces"}</div>
                     <hr />
                         <div className="piece-options">
                             {castleArray.map((name:string, index: number) => (
-                                <img src={(teamIsBlack ? `/pieces/${name}_black.png` : `/pieces/${name}_white.png`)} alt={"piece image"}
+                                <img src={(teamIsBlack ? `/pieces/${name.toLowerCase()}_black.png` : `/pieces/${name}_white.png`)} alt={"piece image"}
                                      className={`icon-container`} draggable="false" id="selectImage"/>)
                             )} </div>
                 <div className="piece-title">{"Major Pieces"}</div>
                     <hr />
                         <div className="piece-options">
                             {majorArray.map((name:string, index: number) => (
-                                <img src={(teamIsBlack ? `/pieces/${name}_black.png` : `/pieces/${name}_white.png`)} alt={"piece image"}
+                                <img src={(teamIsBlack ? `/pieces/${name.toLowerCase()}_black.png` : `/pieces/${name}_white.png`)} alt={"piece image"}
                                      className={`icon-container`} draggable="false" id="selectImage"/>)
                             )} </div>
                 <div className="piece-title">{"Royal Pieces"}</div>
