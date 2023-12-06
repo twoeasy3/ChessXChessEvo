@@ -378,7 +378,7 @@ export class Cannon extends Piece{
 }
 export class Roach extends Piece{
     constructor(isBlack:boolean, colPos: number, rowPos: number) {
-        super(2, isBlack, isBlack ? '/pieces/eoach_black.png' : '/pieces/roach_white.png', colPos, rowPos);
+        super(2, isBlack, isBlack ? '/pieces/roach_black.png' : '/pieces/roach_white.png', colPos, rowPos);
         let tempMarch = new MarchForward(1,1);
         tempMarch.moveMatrix = (isBlack? [[0,1]] : [[0,-1]])
         this.movementBehaviours.push(tempMarch);
