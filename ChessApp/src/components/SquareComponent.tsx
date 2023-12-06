@@ -34,6 +34,7 @@ const SquareComponent: React.FC<SquareComponentProps> = ({ square,isSelected,isL
             {isLegalCapture ? <img src={"./pieces/target.png"} alt={"capture target"} className={`overlay-target`} draggable="false"/> : <div></div>}
             {isCastleMove ? <img src={"./pieces/castle.png"} alt={"castle indicator"} className={`overlay-target`} draggable="false"/> : <div></div>}
             {(teamInCheck && square.getPiece()?.royalty) ? <img src={"./pieces/check.png"} alt={"capture target"} className={`overlay-target`} draggable="false"/> : <div></div>}
+            {square.occupying?.statusTags.includes("immobilised") ? <img src={"./pieces/immobilised.png"} alt={"move target"} className={`overlay-target`} draggable="false"/> : <div></div>}
         </div>
     );
 };

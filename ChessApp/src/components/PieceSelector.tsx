@@ -18,7 +18,7 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({ teamIsBlack,flipBu
     let castleArray:string[] = [
         "Rook", "Cannon","EmpoweredRook"]
     let majorArray:string[] = [
-        "Queen", "Unicorn"]
+        "Queen", "Unicorn","Gorgon"]
 
     function buildFIDE() {
         console.log("building FIDE")
@@ -74,7 +74,7 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({ teamIsBlack,flipBu
     }
 
     function buildMidfield() {
-        console.log("building Infestation")
+        console.log("building Midfield")
         let j:number = (teamIsBlack? 1 : 6)
         for(let i = 0; i <= boardState.length -1 ; i++){
             if(i == 3 || i == 4){
@@ -96,6 +96,29 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({ teamIsBlack,flipBu
         callForUpdate()
     }
 
+    function buildMythic() {
+        console.log("building Mythic")
+        let j:number = (teamIsBlack? 1 : 6)
+        for(let i = 0; i <= boardState.length -1 ; i++){
+            if(i == 2 || i == 6){
+                boardState[i][j].occupy(new Pieces.Mann(teamIsBlack, i, j))
+            }
+            else {
+                boardState[i][j].occupy(new Pieces.Pawn(teamIsBlack, i, j))
+            }
+        }
+        j = (teamIsBlack? j-1 : j+1)
+        boardState[0][j].occupy(new Pieces.Cannon(teamIsBlack, 0, j))
+        boardState[1][j].occupy(new Pieces.Unicorn(teamIsBlack, 1, j))
+        boardState[2][j].occupy(new Pieces.Bishop(teamIsBlack, 2, j))
+        boardState[3][j].occupy(new Pieces.Gorgon(teamIsBlack, 3, j))
+        boardState[4][j].occupy(new Pieces.King(teamIsBlack, 4, j))
+        boardState[5][j].occupy(new Pieces.Bishop(teamIsBlack, 5, j))
+        boardState[6][j].occupy(new Pieces.Unicorn(teamIsBlack, 6, j))
+        boardState[7][j].occupy(new Pieces.Cannon(teamIsBlack, 7, j))
+        callForUpdate()
+    }
+
     const buildPieceSelector = () =>{
 
         return(
@@ -106,7 +129,7 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({ teamIsBlack,flipBu
                     <hr />
                         <div className="piece-options">
                             {pawnArray.map((name:string, index: number) => (
-                                <img src={(teamIsBlack ? `/pieces/${name.toLowerCase()}_black.png` : `/pieces/${name.toLowerCase()}_white.png`)} alt={"piece image"}
+                                <img src={(teamIsBlack ? `/pieces/${name.toLowerCase()}_black.png` : `/pieces/${name}_white.png`)} alt={"piece image"}
                                      className={`icon-container`} draggable="false" id="selectImage"/>)
                             )} </div>
                 <div className="piece-title">{"Minor Pieces"}</div>
@@ -139,6 +162,7 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({ teamIsBlack,flipBu
                 <button className="preset-button" onClick={buildEmpowered}>The Empowered</button>
                 <button className="preset-button" onClick={buildInfestation}>Infestation</button>
                 <button className="preset-button" onClick={buildMidfield}>Midfield Control</button>
+                <button className="preset-button" onClick={buildMythic}>Mystic Myths</button>
                 <hr />
                 <button className="start-game" onClick={setGameStart}>Start Game</button>
             </div>

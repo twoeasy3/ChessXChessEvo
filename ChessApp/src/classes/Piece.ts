@@ -40,6 +40,9 @@ export class Piece{
         this.attributeTags = []
     }
     getMoves(boardState: Square[][]):number[][]{
+        if(this.statusTags.includes("immobilised")){
+            return[];
+        }
         let legalMoves: number[][] = [];
         for (const moveset of this.movementBehaviours){
             legalMoves = legalMoves.concat(moveset.getMoves(boardState,this));
@@ -47,6 +50,9 @@ export class Piece{
         return(legalMoves);
     }
     getCaptures(boardState: Square[][]):number[][]{
+        if(this.statusTags.includes("immobilised")){
+            return[];
+        }
         let legalCaptures: number[][] = [];
         for (const moveset of this.captureBehaviours){
             legalCaptures = legalCaptures.concat(moveset.getCaptures(boardState,this));
@@ -437,6 +443,9 @@ export class EmpoweredBishop extends Piece{
         }
     }
     getMoves(boardState: Square[][]):number[][]{
+        if(this.statusTags.includes("immobilised")){
+            return[];
+        }
         let legalMoves: number[][] = [];
         if(this.statusTags.includes("empower_rook")){
             legalMoves = legalMoves.concat(this.movementBehaviours[2].getMoves(boardState,this));
@@ -448,6 +457,9 @@ export class EmpoweredBishop extends Piece{
         return(legalMoves);
     }
     getCaptures(boardState: Square[][]):number[][]{
+        if(this.statusTags.includes("immobilised")){
+            return[];
+        }
         let legalCaptures: number[][] = [];
         if(this.statusTags.includes("empower_rook")){
             legalCaptures = legalCaptures.concat(this.captureBehaviours[2].getCaptures(boardState,this));
@@ -487,6 +499,9 @@ export class EmpoweredKnight extends Piece{
         }
     }
     getMoves(boardState: Square[][]):number[][]{
+        if(this.statusTags.includes("immobilised")){
+            return[];
+        }
         let legalMoves: number[][] = [];
         if(this.statusTags.includes("empower_bishop")){
             legalMoves = legalMoves.concat(this.movementBehaviours[0].getMoves(boardState,this));
@@ -498,6 +513,9 @@ export class EmpoweredKnight extends Piece{
         return(legalMoves);
     }
     getCaptures(boardState: Square[][]):number[][]{
+        if(this.statusTags.includes("immobilised")){
+            return[];
+        }
         let legalCaptures: number[][] = [];
         if(this.statusTags.includes("empower_bishop")){
             legalCaptures = legalCaptures.concat(this.captureBehaviours[0].getCaptures(boardState,this));
@@ -538,6 +556,9 @@ export class EmpoweredRook extends Piece{
         }
     }
     getMoves(boardState: Square[][]):number[][]{
+        if(this.statusTags.includes("immobilised")){
+            return[];
+        }
         let legalMoves: number[][] = [];
         if(this.statusTags.includes("empower_bishop")){
             legalMoves = legalMoves.concat(this.movementBehaviours[0].getMoves(boardState,this));
@@ -549,6 +570,9 @@ export class EmpoweredRook extends Piece{
         return(legalMoves);
     }
     getCaptures(boardState: Square[][]):number[][]{
+        if(this.statusTags.includes("immobilised")){
+            return[];
+        }
         let legalCaptures: number[][] = [];
         if(this.statusTags.includes("empower_bishop")){
             legalCaptures = legalCaptures.concat(this.captureBehaviours[0].getCaptures(boardState,this));
@@ -560,7 +584,28 @@ export class EmpoweredRook extends Piece{
         return(legalCaptures);
     }
 }
-
+export class Gorgon extends Piece{
+    constructor(isBlack:boolean, colPos: number, rowPos: number) {
+        super(9, isBlack, isBlack ? '/pieces/gorgon_black.png' : '/pieces/gorgon_white.png', colPos, rowPos);
+        this.movementBehaviours.push(new SlidingDiag());
+        this.movementBehaviours.push(new SlidingOrtho());
+    }
+    inflictStatus(boardState:Square[][]): void {
+        let adjacentSquares = [[-1,-1],[-1,0],[-1,1],
+            [0,-1], [0,1],
+            [1,-1], [1,0], [1,1]]
+        for (const direction of adjacentSquares) {
+            if(this.colPos + direction[0] >= 0 && this.colPos + direction[0] <= boardState.length-1 &&
+                this.rowPos + direction[1] >= 0 && this.rowPos + direction[1] <= boardState[this.colPos].length-1){
+                if(boardState[this.colPos + direction[0]][this.rowPos +direction[1]].occupying != null){
+                    if (boardState[this.colPos + direction[0]][this.rowPos +direction[1]].occupying!.isBlack != this.isBlack) {
+                        boardState[this.colPos + direction[0]][this.rowPos +direction[1]].occupying!.statusTags.push("immobilised")
+                    }
+                }
+            }
+        }
+    }
+}
 export function newPieceFromName(name:string,teamIsBlack:boolean):Piece{
     if(name == "Pawn"){
         return(new Pawn(teamIsBlack,-1,-1));
@@ -600,6 +645,9 @@ export function newPieceFromName(name:string,teamIsBlack:boolean):Piece{
     }
     else if (name =="EmpoweredRook"){
         return(new EmpoweredRook(teamIsBlack,-1,-1))
+    }
+    else if (name == "Gorgon"){
+        return(new Gorgon(teamIsBlack,-1,-1))
     }
     else if (name == "King"){
         return(new King(teamIsBlack,-1,-1))
