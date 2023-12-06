@@ -30,7 +30,7 @@ export const PromotionDialog: React.FC<PromotionDialogProps> = ({ onSelect,teamI
             <div className="promotion-options">
                 {pieceArray.map((piece:Pieces.Piece, index: number) => (
                     <img src={piece.image} alt={"piece image"} className={`icon-container`} draggable="false" onClick={() => handlePromotion(piece)}/>)
-                )} </div>\
+                )} </div>
             </div>
         )
     }

@@ -13,40 +13,40 @@ export class Board{
             }
             this.squares.push(row);
         }
-        for (let i = 0; i < width; i++) {
-            /* this.squares[i][1].occupy(new Pieces.Pawn(true, i, 1))*/
-             this.squares[i][width - 2].occupy(new Pieces.Pawn(false, i, width - 2))
+        let teamIsBlack = true
+        let j:number = (teamIsBlack? 1 : 6)
+        for(let i = 0; i <= this.squares.length -1 ; i++){
+            this.squares[i][j].occupy(new Pieces.Pawn(teamIsBlack, i, j))
         }
-        this.squares[2][1].occupy(new Pieces.Roach(true, 2, 1))
-        this.squares[width - 3][1].occupy(new Pieces.Mann(true, width - 3, 1))
-        this.squares[2][8].occupy(new Pieces.Roach(false, 2, 8))
-        this.squares[width - 3][8].occupy(new Pieces.Mann(false, width - 3, 8))
-        /*this.squares[0][0].occupy(new Pieces.Cannon(true, 0, 0))
-        this.squares[1][0].occupy(new Pieces.Knight(true, 1, 0))
-        this.squares[2][0].occupy(new Pieces.Unicorn(true, 2, 0))
-        this.squares[3][0].occupy(new Pieces.Bishop(true, 3, 0))
-        this.squares[4][0].occupy(new Pieces.Queen(true, 4, 0))*/
-        this.squares[5][0].occupy(new Pieces.King(true, 5, 0))
-        /*this.squares[6][0].occupy(new Pieces.Bishop(true, 6, 0))
-        this.squares[7][0].occupy(new Pieces.Unicorn(true,7, 0))
-        this.squares[8][0].occupy(new Pieces.Knight(true, 8, 0))
-        this.squares[9][0].occupy(new Pieces.Rook(true, 9, 0))*/
-
-        this.squares[0][9].occupy(new Pieces.Cannon(false, 0, 9))
-        this.squares[1][9].occupy(new Pieces.Knight(false, 1, 9))
-        this.squares[2][9].occupy(new Pieces.Unicorn(false, 2, 9))
-        this.squares[3][9].occupy(new Pieces.Bishop(false, 3, 9))
-        this.squares[4][9].occupy(new Pieces.Queen(false, 4, 9))
-        this.squares[5][9].occupy(new Pieces.King(false, 5, 9))
-        this.squares[6][9].occupy(new Pieces.Bishop(false, 6, 9))
-        this.squares[7][9].occupy(new Pieces.Unicorn(false,7, 9))
-        this.squares[8][9].occupy(new Pieces.Knight(false, 8, 9))
-        this.squares[9][9].occupy(new Pieces.Rook(false, 9, 9))
-
+        j = (teamIsBlack? j-1 : j+1)
+        this.squares[0][j].occupy(new Pieces.Rook(teamIsBlack, 0, j))
+        this.squares[1][j].occupy(new Pieces.Knight(teamIsBlack, 1, j))
+        this.squares[2][j].occupy(new Pieces.Bishop(teamIsBlack, 2, j))
+        this.squares[3][j].occupy(new Pieces.Queen(teamIsBlack, 3, j))
+        this.squares[4][j].occupy(new Pieces.King(teamIsBlack, 4, j))
+        this.squares[5][j].occupy(new Pieces.Bishop(teamIsBlack, 5, j))
+        this.squares[6][j].occupy(new Pieces.Knight(teamIsBlack, 6, j))
+        this.squares[7][j].occupy(new Pieces.Rook(teamIsBlack, 7, j))
+        teamIsBlack = false
+        j = 6
+        for(let i = 0; i <= this.squares.length -1 ; i++){
+            this.squares[i][j].occupy(new Pieces.Pawn(teamIsBlack, i, j))
+        }
+        j = (teamIsBlack? j-1 : j+1)
+        this.squares[0][j].occupy(new Pieces.Rook(teamIsBlack, 0, j))
+        this.squares[1][j].occupy(new Pieces.Knight(teamIsBlack, 1, j))
+        this.squares[2][j].occupy(new Pieces.Bishop(teamIsBlack, 2, j))
+        this.squares[3][j].occupy(new Pieces.Queen(teamIsBlack, 3, j))
+        this.squares[4][j].occupy(new Pieces.King(teamIsBlack, 4, j))
+        this.squares[5][j].occupy(new Pieces.Bishop(teamIsBlack, 5, j))
+        this.squares[6][j].occupy(new Pieces.Knight(teamIsBlack, 6, j))
+        this.squares[7][j].occupy(new Pieces.Rook(teamIsBlack, 7, j))
     }
+
     getBoardState():Square[][]{
         return this.squares;
     }
+
 
 
 }

@@ -19,6 +19,8 @@ export class Piece{
     canCastle: boolean;
     canPromote: boolean;
     hasDeathTrigger: boolean;
+    attributeTags: string[]
+    statusTags: string[];
 
 
     constructor(pointValue: number, isBlack:boolean, imageString:string, colPos: number, rowPos: number ) {
@@ -34,6 +36,8 @@ export class Piece{
         this.canCastle = false;
         this.canPromote = false;
         this.hasDeathTrigger = false;
+        this.statusTags = []
+        this.attributeTags = []
     }
     getMoves(boardState: Square[][]):number[][]{
         let legalMoves: number[][] = [];
@@ -67,6 +71,12 @@ export class Piece{
         this.isBlack = newTeam;
         this.image = this.image.split('_')[0] + (this.isBlack ? "_black.png" : "_white.png")
     }
+    inflictStatus(boardState:Square[][]):void{
+    }
+    clearStatus(){
+        this.statusTags = [];
+    }
+
 }
 interface MovementBehaviour{
     getMoves(boardState:Square[][],piece:Piece):number[][];
@@ -147,27 +157,25 @@ class SlidingDiag extends BasicLinearMoves {
 class MarchForward implements MovementBehaviour{
     limit:number;
     firstStep:number;
-    constructor(limit:number,firstStep:number) {
+    moveMatrix:number[][];
+    constructor(limit:number,firstStep:number ) {
         this.limit = limit;
         this.firstStep = firstStep
-    }
-    getMoves(boardState:Square[][], piece:Piece){
-        let legalMoves:number[][] = [];
-        let functionalLimit: number = this.limit;
-        if(!piece.hasMoved){ functionalLimit = this.firstStep};
-        let i:number = 1;
-        if(piece.isBlack){
-            while(piece.rowPos+i <= boardState.length-1 && boardState[piece.colPos][piece.rowPos+i].occupying == null && i<=functionalLimit){
-                legalMoves.push([piece.colPos,piece.rowPos+i]);
-                i++
-                }
-        }
-        else{
-            while(piece.rowPos-i >= 0 && boardState[piece.colPos][piece.rowPos-i].occupying == null && i<=functionalLimit){
-                legalMoves.push([piece.colPos,piece.rowPos-i]);
-                i++
-                }
+        this.moveMatrix = [[1,0]]
 
+    }
+    getMoves(boardState:Square[][],piece:Piece):number[][]{
+        let i:number = 1;
+        let legalMoves: number[][] = []
+        for (const direction of this.moveMatrix){
+            i = 1;
+            while((i<=this.limit || (i<=this.firstStep && !piece.hasMoved)) &&
+            (piece.colPos + i*direction[0]) >= 0 && (piece.colPos + i*direction[0]) <= boardState[0].length -1 &&
+            (piece.rowPos + i*direction[1]) >= 0 && (piece.rowPos + i*direction[1]) <= boardState.length -1 &&
+            boardState[piece.colPos+i*direction[0]][piece.rowPos+i*direction[1]].occupying == null){
+                legalMoves.push([piece.colPos+i*direction[0],piece.rowPos+i*direction[1]]);
+                i++
+            }
         }
         return legalMoves;
     }
@@ -223,7 +231,9 @@ export class Pawn extends Piece{
     constructor(isBlack:boolean, colPos: number, rowPos: number) {
         super(1, isBlack, isBlack ? '/pieces/pawn_black.png' : '/pieces/pawn_white.png', colPos, rowPos);
         this.canPromote = true;
-        this.movementBehaviours.push(new MarchForward(1,2));
+        let tempMarch = new MarchForward(1,2);
+        tempMarch.moveMatrix = (isBlack? [[0,1]] : [[0,-1]])
+        this.movementBehaviours.push(tempMarch);
         this.captureBehaviours.push(new PawnCapture(this.isBlack));
     }
 }
@@ -266,7 +276,6 @@ export class Queen extends Piece{
         this.movementBehaviours.push(new SlidingOrtho());
         this.captureBehaviours.push(new SlidingOrtho());
     }
-
 }
 export class King extends Piece{
     constructor(isBlack:boolean, colPos: number, rowPos: number) {
@@ -369,8 +378,10 @@ export class Cannon extends Piece{
 }
 export class Roach extends Piece{
     constructor(isBlack:boolean, colPos: number, rowPos: number) {
-        super(2, isBlack, isBlack ? '/pieces/roach_black.png' : '/pieces/roach_white.png', colPos, rowPos);
-        this.movementBehaviours.push(new MarchForward(1,1));
+        super(2, isBlack, isBlack ? '/pieces/Roach_black.png' : '/pieces/roach_white.png', colPos, rowPos);
+        let tempMarch = new MarchForward(1,1);
+        tempMarch.moveMatrix = (isBlack? [[0,1]] : [[0,-1]])
+        this.movementBehaviours.push(tempMarch);
         this.captureBehaviours.push(new PawnCapture(this.isBlack));
         this.hasDeathTrigger = true;
         this.canPromote = true;
@@ -385,4 +396,214 @@ export class Roach extends Piece{
             this.updatePosition(this.colPos, boardState[this.colPos].length-2)
         }
     }
+}
+export class Berolina extends Piece{
+    constructor(isBlack:boolean,colPos:number,rowPos:number) {
+        super(1,isBlack, isBlack ? '/pieces/Berolina_black.png' : '/pieces/Berolina_white.png', colPos, rowPos );
+        this.canPromote = true
+        let tempMarch = new MarchForward(1,2);
+        tempMarch.moveMatrix = (isBlack? [[1,1],[-1,1]] : [[-1,-1],[1,-1]])
+        this.movementBehaviours.push(tempMarch);
+        let tempCapture = new SlidingOrtho(1)
+        tempCapture.moveMatrix = (isBlack? [[0,1]] : [[0,-1]])
+        this.captureBehaviours.push(tempCapture);
+    }
+}
+export class EmpoweredBishop extends Piece{
+    constructor(isBlack:boolean, colPos: number, rowPos: number) {
+        super(3, isBlack, isBlack ? '/pieces/EmpoweredBishop_black.png' : '/pieces/EmpoweredBishop_white.png', colPos, rowPos);
+        this.movementBehaviours.push(new SlidingDiag(16));
+        this.captureBehaviours.push(new SlidingDiag(16));
+        this.movementBehaviours.push(new LeapingHippo(1,2));
+        this.captureBehaviours.push(new LeapingHippo(1,2));
+        this.movementBehaviours.push(new SlidingOrtho(16));
+        this.captureBehaviours.push(new SlidingOrtho(16));
+        this.attributeTags.push("empowered")
+    }
+    inflictStatus(boardState:Square[][]): void {
+        let adjacentSquares = [[-1,-1],[-1,0],[-1,1],
+            [0,-1], [0,1],
+            [1,-1], [1,0], [1,1]]
+        for (const direction of adjacentSquares) {
+            if(this.colPos + direction[0] >= 0 && this.colPos + direction[0] <= boardState.length-1 &&
+                this.rowPos + direction[1] >= 0 && this.rowPos + direction[1] <= boardState[this.colPos].length-1){
+                if(boardState[this.colPos + direction[0]][this.rowPos +direction[1]].occupying != null){
+                    if (boardState[this.colPos + direction[0]][this.rowPos +direction[1]].occupying!.attributeTags.includes("empowered") &&
+                        boardState[this.colPos + direction[0]][this.rowPos +direction[1]].occupying!.isBlack == this.isBlack) {
+                        boardState[this.colPos + direction[0]][this.rowPos +direction[1]].occupying!.statusTags.push("empower_bishop")
+                    }
+                }
+            }
+        }
+    }
+    getMoves(boardState: Square[][]):number[][]{
+        let legalMoves: number[][] = [];
+        if(this.statusTags.includes("empower_rook")){
+            legalMoves = legalMoves.concat(this.movementBehaviours[2].getMoves(boardState,this));
+        }
+        if(this.statusTags.includes("empower_knight")){
+            legalMoves = legalMoves.concat(this.movementBehaviours[1].getMoves(boardState,this));
+        }
+        legalMoves = legalMoves.concat(this.movementBehaviours[0].getMoves(boardState,this));
+        return(legalMoves);
+    }
+    getCaptures(boardState: Square[][]):number[][]{
+        let legalCaptures: number[][] = [];
+        if(this.statusTags.includes("empower_rook")){
+            legalCaptures = legalCaptures.concat(this.captureBehaviours[2].getCaptures(boardState,this));
+        }
+        if(this.statusTags.includes("empower_knight")){
+            legalCaptures = legalCaptures.concat(this.captureBehaviours[1].getCaptures(boardState,this));
+        }
+        legalCaptures = legalCaptures.concat(this.captureBehaviours[0].getCaptures(boardState,this));
+        return(legalCaptures);
+    }
+}
+export class EmpoweredKnight extends Piece{
+    constructor(isBlack:boolean, colPos: number, rowPos: number) {
+        super(3, isBlack, isBlack ? '/pieces/EmpoweredKnight_black.png' : '/pieces/EmpoweredKnight_white.png', colPos, rowPos);
+        this.movementBehaviours.push(new SlidingDiag(16));
+        this.captureBehaviours.push(new SlidingDiag(16));
+        this.movementBehaviours.push(new LeapingHippo(1,2));
+        this.captureBehaviours.push(new LeapingHippo(1,2));
+        this.movementBehaviours.push(new SlidingOrtho(16));
+        this.captureBehaviours.push(new SlidingOrtho(16));
+        this.attributeTags.push("empowered")
+    }
+    inflictStatus(boardState:Square[][]): void {
+        let adjacentSquares = [[-1,-1],[-1,0],[-1,1],
+            [0,-1], [0,1],
+            [1,-1], [1,0], [1,1]]
+        for (const direction of adjacentSquares) {
+            if(this.colPos + direction[0] >= 0 && this.colPos + direction[0] <= boardState.length-1 &&
+                this.rowPos + direction[1] >= 0 && this.rowPos + direction[1] <= boardState[this.colPos].length-1){
+                if(boardState[this.colPos + direction[0]][this.rowPos +direction[1]].occupying != null){
+                    if (boardState[this.colPos + direction[0]][this.rowPos +direction[1]].occupying!.attributeTags.includes("empowered") &&
+                        boardState[this.colPos + direction[0]][this.rowPos +direction[1]].occupying!.isBlack == this.isBlack) {
+                        boardState[this.colPos + direction[0]][this.rowPos +direction[1]].occupying!.statusTags.push("empower_knight")
+                    }
+                }
+            }
+        }
+    }
+    getMoves(boardState: Square[][]):number[][]{
+        let legalMoves: number[][] = [];
+        if(this.statusTags.includes("empower_bishop")){
+            legalMoves = legalMoves.concat(this.movementBehaviours[0].getMoves(boardState,this));
+        }
+        if(this.statusTags.includes("empower_rook")){
+            legalMoves = legalMoves.concat(this.movementBehaviours[2].getMoves(boardState,this));
+        }
+        legalMoves = legalMoves.concat(this.movementBehaviours[1].getMoves(boardState,this));
+        return(legalMoves);
+    }
+    getCaptures(boardState: Square[][]):number[][]{
+        let legalCaptures: number[][] = [];
+        if(this.statusTags.includes("empower_bishop")){
+            legalCaptures = legalCaptures.concat(this.captureBehaviours[0].getCaptures(boardState,this));
+        }
+        if(this.statusTags.includes("empower_rook")){
+            legalCaptures = legalCaptures.concat(this.captureBehaviours[2].getCaptures(boardState,this));
+        }
+        legalCaptures = legalCaptures.concat(this.captureBehaviours[1].getCaptures(boardState,this));
+        return(legalCaptures);
+    }
+}
+export class EmpoweredRook extends Piece{
+    constructor(isBlack:boolean, colPos: number, rowPos: number) {
+        super(5, isBlack, isBlack ? '/pieces/EmpoweredRook_black.png' : '/pieces/EmpoweredRook_white.png', colPos, rowPos);
+        this.canCastle = true;
+        this.movementBehaviours.push(new SlidingDiag(16));
+        this.captureBehaviours.push(new SlidingDiag(16));
+        this.movementBehaviours.push(new LeapingHippo(1,2));
+        this.captureBehaviours.push(new LeapingHippo(1,2));
+        this.movementBehaviours.push(new SlidingOrtho(16));
+        this.captureBehaviours.push(new SlidingOrtho(16));
+        this.attributeTags.push("empowered")
+    }
+    inflictStatus(boardState:Square[][]): void {
+        let adjacentSquares = [[-1,-1],[-1,0],[-1,1],
+                                          [0,-1], [0,1],
+                                          [1,-1], [1,0], [1,1]]
+        for (const direction of adjacentSquares) {
+            if(this.colPos + direction[0] >= 0 && this.colPos + direction[0] <= boardState.length-1 &&
+                this.rowPos + direction[1] >= 0 && this.rowPos + direction[1] <= boardState[this.colPos].length-1){
+                if(boardState[this.colPos + direction[0]][this.rowPos +direction[1]].occupying != null){
+                    if (boardState[this.colPos + direction[0]][this.rowPos +direction[1]].occupying!.attributeTags.includes("empowered") &&
+                        boardState[this.colPos + direction[0]][this.rowPos +direction[1]].occupying!.isBlack == this.isBlack) {
+                        boardState[this.colPos + direction[0]][this.rowPos +direction[1]].occupying!.statusTags.push("empower_rook")
+                    }
+                }
+            }
+        }
+    }
+    getMoves(boardState: Square[][]):number[][]{
+        let legalMoves: number[][] = [];
+        if(this.statusTags.includes("empower_bishop")){
+            legalMoves = legalMoves.concat(this.movementBehaviours[0].getMoves(boardState,this));
+        }
+        if(this.statusTags.includes("empower_knight")){
+            legalMoves = legalMoves.concat(this.movementBehaviours[1].getMoves(boardState,this));
+        }
+        legalMoves = legalMoves.concat(this.movementBehaviours[2].getMoves(boardState,this));
+        return(legalMoves);
+    }
+    getCaptures(boardState: Square[][]):number[][]{
+        let legalCaptures: number[][] = [];
+        if(this.statusTags.includes("empower_bishop")){
+            legalCaptures = legalCaptures.concat(this.captureBehaviours[0].getCaptures(boardState,this));
+        }
+        if(this.statusTags.includes("empower_knight")){
+            legalCaptures = legalCaptures.concat(this.captureBehaviours[1].getCaptures(boardState,this));
+        }
+        legalCaptures = legalCaptures.concat(this.captureBehaviours[2].getCaptures(boardState,this));
+        return(legalCaptures);
+    }
+}
+
+export function newPieceFromName(name:string,teamIsBlack:boolean):Piece{
+    if(name == "Pawn"){
+        return(new Pawn(teamIsBlack,-1,-1));
+    }
+    else if(name =="Roach") {
+        return (new Roach(teamIsBlack, -1, -1));
+    }
+    else if(name == "Berolina"){
+        return (new Berolina(teamIsBlack,-1,-1))
+    }
+    else if(name =="Bishop"){
+        return(new Bishop(teamIsBlack,-1,-1))
+    }
+    else if (name == "Knight"){
+        return(new Knight(teamIsBlack,-1,-1))
+    }
+    else if (name == "Mann"){
+        return(new Mann(teamIsBlack,-1,-1))
+    }
+    else if (name == "Cannon"){
+        return(new Cannon(teamIsBlack,-1,-1))
+    }
+    else if (name == "Rook"){
+        return(new Rook(teamIsBlack,-1,-1))
+    }
+    else if (name == "Unicorn"){
+        return(new Unicorn(teamIsBlack,-1,-1))
+    }
+    else if (name == "Queen"){
+        return(new Queen(teamIsBlack,-1,-1))
+    }
+    else if (name =="EmpoweredBishop"){
+        return(new EmpoweredBishop(teamIsBlack,-1,-1))
+    }
+    else if (name =="EmpoweredKnight"){
+        return(new EmpoweredKnight(teamIsBlack,-1,-1))
+    }
+    else if (name =="EmpoweredRook"){
+        return(new EmpoweredRook(teamIsBlack,-1,-1))
+    }
+    else if (name == "King"){
+        return(new King(teamIsBlack,-1,-1))
+    }
+    else return(new Pawn(teamIsBlack,-1,-1))
+
 }

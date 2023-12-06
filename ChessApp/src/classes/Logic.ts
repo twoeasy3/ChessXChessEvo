@@ -190,3 +190,20 @@ export function pawnInPromotionZone(square:Square, lastRow:number){
     }
     return false
 }
+
+export function updateAllStatuses(boardState:Square[][]){
+    for(let i = 0; i<= boardState.length-1; i++){
+        for(let j = 0; j<= boardState[i].length-1; j++){
+            if(boardState[i][j].occupying!=null){
+                boardState[i][j].occupying!.clearStatus()
+            }
+        }
+    }
+    for(let k = 0; k<= boardState.length-1; k++){
+        for(let l = 0; l<= boardState[k].length-1; l++){
+            if(boardState[k][l].occupying!=null){
+                boardState[k][l].occupying!.inflictStatus(boardState)
+            }
+        }
+    }
+}
