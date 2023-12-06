@@ -120,7 +120,8 @@ class BasicLinearMoves implements MovementBehaviour{
             (piece.colPos + i*direction[0]) >= 0 && (piece.colPos + i*direction[0]) <= boardState[0].length -1 &&
             (piece.rowPos + i*direction[1]) >= 0 && (piece.rowPos + i*direction[1]) <= boardState.length -1){
                 if( boardState[piece.colPos+i*direction[0]][piece.rowPos+i*direction[1]].occupying != null){
-                    if(boardState[piece.colPos+i*direction[0]][piece.rowPos+i*direction[1]].occupying?.isBlack != piece.isBlack) {
+                    if(boardState[piece.colPos+i*direction[0]][piece.rowPos+i*direction[1]].occupying?.isBlack != piece.isBlack
+                    && !boardState[piece.colPos+i*direction[0]][piece.rowPos+i*direction[1]].occupying!.attributeTags.includes("indestructible")) {
                         legalCaptures.push([piece.colPos + i * direction[0],piece.rowPos + i * direction[1]]);}
                     break;
                 }
@@ -216,7 +217,8 @@ class CannonCapture implements MovementBehaviour{
             (piece.rowPos + i*direction[1]) >= 0 && (piece.rowPos + i*direction[1]) <= boardState.length -1){
                 if( boardState[piece.colPos+i*direction[0]][piece.rowPos+i*direction[1]].occupying != null){
                     if(screenFound === true) {
-                        if (boardState[piece.colPos + i * direction[0]][piece.rowPos + i * direction[1]].occupying?.isBlack != piece.isBlack) {
+                        if (boardState[piece.colPos + i * direction[0]][piece.rowPos + i * direction[1]].occupying?.isBlack != piece.isBlack &&
+                            !boardState[piece.colPos + i * direction[0]][piece.rowPos + i * direction[1]].occupying!.attributeTags.includes("indestructible")) {
                             legalCaptures.push([piece.colPos + i * direction[0], piece.rowPos + i * direction[1]]);
                             break;
                         }
@@ -227,6 +229,79 @@ class CannonCapture implements MovementBehaviour{
                     }
                 }
                 i++
+            }
+        }
+        return legalCaptures
+    }
+
+}
+class TeleportAnywhere implements MovementBehaviour{
+    constructor(){}
+    getMoves(boardState: Square[][], piece: Piece): number[][] {
+        let legalMoves: number[][] = []
+        for(let i = 0; i<= boardState.length-1 ; i++){
+            for(let j = 0; j<= boardState[i].length-1 ; j++){
+                if(boardState[i][j].occupying == null){
+                    legalMoves.push([i,j])}
+            }
+        }
+        return legalMoves;
+    }
+    getCaptures(boardState: Square[][], piece: Piece): number[][] {
+        let legalCaptures: number[][] = []
+        let i:number = (piece.isBlack ? 0 : 1)
+        let maxFile = (piece.isBlack ? boardState[0].length-2 : boardState[0].length-1)
+        for(let j = 0; j <= boardState.length -1 ; j++) {
+            for (let i:number = (piece.isBlack ? 0 : 1) ; i<= maxFile ; i++) {
+                if (boardState[j][i].occupying != null) {
+                    if (!boardState[j][i].occupying!.royalty && boardState[j][i].occupying!.isBlack != piece.isBlack &&
+                        !boardState[j][i].occupying!.attributeTags.includes("indestructible")) {
+                        legalCaptures.push([j, i])
+                    }
+                }
+            }
+        }
+        return legalCaptures;
+    }
+}
+class SoldierConditional implements MovementBehaviour{
+    limit:number;
+    moveMatrix: number[][]
+    constructor(limit:number,isBlack:boolean){
+        this.limit= limit
+        this.moveMatrix = (isBlack ? [[0,1],[1,0],[-1,0]] : [[0,-1],[1,0],[-1,0]]);
+    }
+    getMoves(boardState:Square[][],piece:Piece):number[][]{
+        let threshold = (piece.isBlack ? boardState[0].length/2 : (boardState[0].length/2)-1)
+        let thresholdMet:boolean = (piece.isBlack ? piece.rowPos >= threshold : piece.rowPos <= threshold)
+        let legalMoves: number[][] = [];
+        for(let i = 0; i<= (thresholdMet ? 2 : 0); i++){
+            let direction = this.moveMatrix[i]
+            if(
+            (piece.colPos + direction[0]) >= 0 && (piece.colPos + direction[0]) <= boardState[0].length -1 &&
+            (piece.rowPos + direction[1]) >= 0 && (piece.rowPos + direction[1]) <= boardState.length -1 &&
+            boardState[piece.colPos+ direction[0]][piece.rowPos+ direction[1]].occupying == null){
+                legalMoves.push([piece.colPos+ direction[0],piece.rowPos+ direction[1]]);
+            }
+        }
+    return legalMoves
+    }
+
+    getCaptures(boardState:Square[][],piece:Piece):number[][]{
+        let threshold = (piece.isBlack ? boardState[0].length/2 : (boardState[0].length/2)-1)
+        let thresholdMet:boolean = (piece.isBlack ? piece.rowPos >= threshold : piece.rowPos <= threshold)
+
+        let legalCaptures: number[][] = [];
+        for(let i = 0; i<= (thresholdMet ? 2 : 0); i++){
+            let direction = this.moveMatrix[i]
+            if(
+                (piece.colPos + direction[0]) >= 0 && (piece.colPos + direction[0]) <= boardState[0].length -1 &&
+                (piece.rowPos + direction[1]) >= 0 && (piece.rowPos + direction[1]) <= boardState.length -1 &&
+                boardState[piece.colPos+ direction[0]][piece.rowPos+ direction[1]].occupying != null){
+                    if(!boardState[piece.colPos+ direction[0]][piece.rowPos+ direction[1]].occupying!.attributeTags.includes("indestructible") &&
+                        boardState[piece.colPos+ direction[0]][piece.rowPos+ direction[1]].occupying!.isBlack != piece.isBlack) {
+                        legalCaptures.push([piece.colPos + direction[0], piece.rowPos + direction[1]]);
+                    }
             }
         }
         return legalCaptures
@@ -606,6 +681,31 @@ export class Gorgon extends Piece{
         }
     }
 }
+
+export class Ghost extends Piece{
+    constructor(isBlack:boolean, colPos: number, rowPos: number) {
+        super(5, isBlack, isBlack ? '/pieces/ghost_black.png' : '/pieces/ghost_white.png', colPos, rowPos);
+        this.attributeTags.push("indestructible");
+        this.movementBehaviours.push(new TeleportAnywhere());
+    }
+}
+
+export class Reaper extends Piece{
+    constructor(isBlack:boolean, colPos: number, rowPos: number) {
+        super(9, isBlack, isBlack ? '/pieces/reaper_black.png' : '/pieces/reaper_white.png', colPos, rowPos);
+        this.movementBehaviours.push(new TeleportAnywhere());
+        this.captureBehaviours.push(new TeleportAnywhere());
+    }
+}
+
+export class Soldier extends Piece{
+    constructor(isBlack:boolean, colPos: number, rowPos: number) {
+        super(1, isBlack, isBlack ? '/pieces/soldier_black.png' : '/pieces/soldier_white.png', colPos, rowPos);
+        this.movementBehaviours.push(new SoldierConditional(1,isBlack));
+        this.captureBehaviours.push(new SoldierConditional(1,isBlack));
+    }
+}
+
 export function newPieceFromName(name:string,teamIsBlack:boolean):Piece{
     if(name == "Pawn"){
         return(new Pawn(teamIsBlack,-1,-1));
@@ -648,6 +748,15 @@ export function newPieceFromName(name:string,teamIsBlack:boolean):Piece{
     }
     else if (name == "Gorgon"){
         return(new Gorgon(teamIsBlack,-1,-1))
+    }
+    else if (name == "Ghost"){
+        return(new Ghost(teamIsBlack,-1,-1))
+    }
+    else if (name == "Reaper"){
+        return (new Reaper(teamIsBlack, -1 ,-1))
+    }
+    else if (name == "Soldier"){
+        return (new Soldier(teamIsBlack,-1,-1))
     }
     else if (name == "King"){
         return(new King(teamIsBlack,-1,-1))
